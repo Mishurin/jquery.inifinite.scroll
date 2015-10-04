@@ -2,8 +2,8 @@ app.infiniteScroll = app.infiniteScroll = {};
 
 $(function () {
     var $container = $('#infinite-scroll'),
-        containerWidth = $(window).outerWidth(true),
-        containerHeight = $(window).outerHeight(true),
+        containerWidth = $container.outerWidth(true),
+        containerHeight = $container.outerHeight(true),
         $item = $('#item'),
         firstIndex,
         startIndex = 0,
@@ -19,7 +19,9 @@ $(function () {
         },
         
          _getItemsNumber = function (itemWidth, itemHeight) {
-            return  Math.ceil((containerWidth * containerHeight) / (itemWidth * itemHeight));
+            var rows = Math.round(containerHeight / itemHeight);
+            var cols = Math.round(containerWidth / itemWidth);
+            return  rows * cols;
          },
 
         _init = function () {
@@ -47,7 +49,6 @@ $(function () {
                             $items.slice(0, numberToTruncate).remove();
                             itemsNumber = itemsNumber - numberToTruncate;
                             firstIndex = firstIndex + numberToTruncate;
-                            console.log('First', firstIndex);
                         }
 
                         app.json.getData(itemsNumberPerFrame, startIndex).forEach(function (item) {
