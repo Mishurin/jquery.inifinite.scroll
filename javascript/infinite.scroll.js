@@ -10,6 +10,7 @@ $(function () {
         itemsNumber = 0,
         numberToTruncate,
         maxItemsNumber,
+        isLoading = false,
         
          _getIndicatorSize = function ($indicator) {
             return {
@@ -30,56 +31,60 @@ $(function () {
             numberToTruncate = itemsNumberPerFrame;
             maxItemsNumber = itemsNumberPerFrame;
 
-            app.json.getData(itemsNumberPerFrame, startIndex).forEach(function (item) {
-                $container.append('<div class="item col-xs-6 col-md-3">' + item.data + '</div>');
+            app.json.getData(itemsNumberPerFrame, startIndex).done(function(data) {
+                data.forEach(function (item) {
+                    $container.append('<div class="item col-xs-6 col-md-3">' + item.data + '</div>');
+                });
+
+                $(window).scrollTop(0);
+
+                startIndex = startIndex + itemsNumberPerFrame;
+                itemsNumber = itemsNumber + itemsNumberPerFrame;
+                firstIndex = 0;
             });
 
-            $(window).scrollTop(0);
-
-            startIndex = startIndex + itemsNumberPerFrame;
-            itemsNumber = itemsNumber + itemsNumberPerFrame;
-            firstIndex = 0;
-
             setTimeout(function () {
+
                 $(window).on('scroll', function () {
+                    if (isLoading) return;
                     var $items;
                     var scrollTop = $(window).scrollTop();
-
                     if(scrollTop + $(window).height() == $(document).height()) {
-
-                        app.json.getData(itemsNumberPerFrame, startIndex).forEach(function (item) {
-                            $container.append('<div class="item col-xs-6 col-md-3">' + item.data + '</div>');
+                        isLoading = true;
+                        app.json.getData(itemsNumberPerFrame, startIndex).done(function (data) {
+                            data.forEach(function (item) {
+                                $container.append('<div class="item col-xs-6 col-md-3">' + item.data + '</div>');
+                            });
+                            itemsNumber = itemsNumber + itemsNumberPerFrame;
+                            startIndex = startIndex + itemsNumberPerFrame;
+                            if(itemsNumber >= maxItemsNumber) {
+                                $items = $container.find('.item');
+                                $items.slice(0, numberToTruncate).remove();
+                                itemsNumber = itemsNumber - numberToTruncate;
+                                firstIndex = firstIndex + numberToTruncate;
+                            }
+                            $(window).scrollTop(1);
+                            isLoading = false;
                         });
-
-                        itemsNumber = itemsNumber + itemsNumberPerFrame;
-                        startIndex = startIndex + itemsNumberPerFrame;
-
-                        if(itemsNumber >= maxItemsNumber) {
-                            $items = $container.find('.item');
-                            $items.slice(0, numberToTruncate).remove();
-                            itemsNumber = itemsNumber - numberToTruncate;
-                            firstIndex = firstIndex + numberToTruncate;
-                        }
-                        $(window).scrollTop(1);
 
                     } else if (scrollTop == 0 && firstIndex > 0) {
-
                         var itemsNumberToPrepend = firstIndex - itemsNumberPerFrame  < 0? firstIndex : itemsNumberPerFrame;
                         firstIndex = firstIndex - itemsNumberPerFrame  < 0? 0 : firstIndex - itemsNumberPerFrame;
-
-                        app.json.getData(itemsNumberToPrepend, firstIndex).reverse().forEach(function (item) {
-                            $container.prepend('<div class="item col-xs-6 col-md-3">' + item.data + '</div>');
+                        isLoading = true;
+                        app.json.getData(itemsNumberToPrepend, firstIndex).done(function(data) {
+                            data.reverse().forEach(function (item) {
+                                $container.prepend('<div class="item col-xs-6 col-md-3">' + item.data + '</div>');
+                            });
+                            itemsNumber = itemsNumber + itemsNumberPerFrame;
+                            if(itemsNumber >= maxItemsNumber) {
+                                $items = $container.find('.item');
+                                $items.slice(-numberToTruncate).remove();
+                                itemsNumber = itemsNumber - numberToTruncate;
+                                startIndex = startIndex - numberToTruncate;
+                            }
+                            $(window).scrollTop(1);
+                            isLoading = false;
                         });
-
-                        itemsNumber = itemsNumber + itemsNumberPerFrame;
-
-                        if(itemsNumber >= maxItemsNumber) {
-                            $items = $container.find('.item');
-                            $items.slice(-numberToTruncate).remove();
-                            itemsNumber = itemsNumber - numberToTruncate;
-                            startIndex = startIndex - numberToTruncate;
-                        }
-                        $(window).scrollTop(1);
                     }
                 });
             }, 0);

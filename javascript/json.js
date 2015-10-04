@@ -1,6 +1,8 @@
 app.json = app.json || {};
 
 app.json.getData = function (n, k) {
+
+    var deferred = $.Deferred();
     var json = [],
         j = n + k,
         i;
@@ -11,6 +13,8 @@ app.json.getData = function (n, k) {
         json.push(item);
     }
 
-    return json;
+    deferred.resolve(json);
+
+    return deferred.promise();
 };
 
