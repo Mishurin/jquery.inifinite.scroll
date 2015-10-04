@@ -1,0 +1,10 @@
+node_modules
+node
+.sass-cache/
+*.project
+*.settings
+*.iml
+*.ipr
+*.iws
+target
+.idea
