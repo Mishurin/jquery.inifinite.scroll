@@ -30,21 +30,19 @@ $(function () {
                 itemsNumberPerFrame =  _getItemsNumber(indicatorSize.width, indicatorSize.height);
             numberToTruncate = itemsNumberPerFrame;
             maxItemsNumber = itemsNumberPerFrame;
-
+            isLoading = true;
             app.json.getData(itemsNumberPerFrame, startIndex).done(function(data) {
                 data.forEach(function (item) {
                     $container.append('<div class="item col-xs-6 col-md-3">' + item.data + '</div>');
                 });
-
                 $(window).scrollTop(0);
-
                 startIndex = startIndex + itemsNumberPerFrame;
                 itemsNumber = itemsNumber + itemsNumberPerFrame;
                 firstIndex = 0;
+                isLoading = false;
             });
 
             setTimeout(function () {
-
                 $(window).on('scroll', function () {
                     if (isLoading) return;
                     var $items;
@@ -66,7 +64,6 @@ $(function () {
                             $(window).scrollTop(1);
                             isLoading = false;
                         });
-
                     } else if (scrollTop == 0 && firstIndex > 0) {
                         var itemsNumberToPrepend = firstIndex - itemsNumberPerFrame  < 0? firstIndex : itemsNumberPerFrame;
                         firstIndex = firstIndex - itemsNumberPerFrame  < 0? 0 : firstIndex - itemsNumberPerFrame;
